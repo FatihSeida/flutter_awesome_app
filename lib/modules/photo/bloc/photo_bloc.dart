@@ -4,6 +4,7 @@ import 'package:awesome_app/enums/layout_mode.dart';
 import 'package:awesome_app/modules/photo/models/album.dart';
 import 'package:awesome_app/modules/photo/repositories/photo_repository.dart';
 import 'package:bloc/bloc.dart';
+import 'package:connectivity/connectivity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -14,6 +15,8 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
   PhotoBloc(this.photoRepository) : super(PhotoState.initial());
 
   final PhotoRepository photoRepository;
+
+  // final PhotoCache photoCache;
 
   @override
   Stream<Transition<PhotoEvent, PhotoState>> transformEvents(
@@ -26,6 +29,16 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     return events
         .debounceTime(const Duration(milliseconds: 250))
         .switchMap(transitionFn);
+  }
+
+  Future<bool> check() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile) {
+      return true;
+    } else if (connectivityResult == ConnectivityResult.wifi) {
+      return true;
+    }
+    return false;
   }
 
   @override
@@ -48,9 +61,22 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
   Stream<PhotoState> mapFetchPhotoToState() async* {
     yield state.copyWith(photoStatus: PhotoStatus.loading);
     try {
+      final connection = await check();
+      if (connection == false) {
+        yield state.copyWith(
+            photoStatus: PhotoStatus.noConnection,
+            connectionResultMessage: 'No Connection');
+        yield state.copyWith(
+          photoStatus: PhotoStatus.loaded,
+          photos: state.photos,
+          hasReachedMax: false,
+        );
+      }
       final albumData = await photoRepository.fetchPhoto();
       yield state.copyWith(
-          photos: albumData.photos, photoStatus: PhotoStatus.loaded, page: albumData.page);
+          photos: albumData.photos,
+          photoStatus: PhotoStatus.loaded,
+          page: albumData.page);
     } catch (e) {}
   }
 
@@ -62,6 +88,17 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
   Stream<PhotoState> mapLoadMorePhotoToState(PhotoState state) async* {
     try {
       if (state.photoStatus == PhotoStatus.loaded) {
+        final connection = await check();
+        if (connection == false) {
+          yield state.copyWith(
+              photoStatus: PhotoStatus.noConnection,
+              connectionResultMessage: 'No Connection');
+          yield state.copyWith(
+            photoStatus: PhotoStatus.loaded,
+            photos: state.photos,
+            hasReachedMax: false,
+          );
+        }
         int page = state.page;
         ++page;
         final albumData = await photoRepository.fetchPhoto(page);

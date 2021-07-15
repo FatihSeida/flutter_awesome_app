@@ -1,6 +1,6 @@
 part of 'photo_bloc.dart';
 
-enum PhotoStatus { initial, loading, loaded, error }
+enum PhotoStatus { initial, loading, loaded, noConnection, error }
 
 class PhotoState extends Equatable {
   final List<Photo> photos;
@@ -8,6 +8,7 @@ class PhotoState extends Equatable {
   final PhotoStatus photoStatus;
   final bool hasReachedMax;
   final int page;
+  final String connectionResultMessage;
 
   PhotoState({
     required this.photoStatus,
@@ -15,11 +16,12 @@ class PhotoState extends Equatable {
     required this.layoutMode,
     required this.hasReachedMax,
     required this.page,
+    required this.connectionResultMessage,
   });
 
   @override
   List<Object> get props =>
-      [photos, layoutMode, photoStatus, layoutMode, hasReachedMax, page];
+      [photos, layoutMode, photoStatus, hasReachedMax, page, connectionResultMessage];
 
   PhotoState copyWith({
     List<Photo>? photos,
@@ -27,13 +29,16 @@ class PhotoState extends Equatable {
     PhotoStatus? photoStatus,
     bool? hasReachedMax,
     int? page,
+    String? connectionResultMessage,
   }) {
     return PhotoState(
-        photos: photos ?? this.photos,
-        layoutMode: layoutMode ?? this.layoutMode,
-        photoStatus: photoStatus ?? this.photoStatus,
-        hasReachedMax: hasReachedMax ?? this.hasReachedMax,
-        page: page ?? this.page);
+      photos: photos ?? this.photos,
+      layoutMode: layoutMode ?? this.layoutMode,
+      photoStatus: photoStatus ?? this.photoStatus,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
+      page: page ?? this.page,
+      connectionResultMessage: connectionResultMessage ?? this.connectionResultMessage,
+    );
   }
 
   factory PhotoState.initial() {
@@ -64,6 +69,7 @@ class PhotoState extends Equatable {
       photoStatus: PhotoStatus.initial,
       hasReachedMax: false,
       page: 0,
+      connectionResultMessage: '',
     );
   }
 }
