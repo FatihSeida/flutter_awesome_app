@@ -1,0 +1,1 @@
+enum LayoutMode {gridview, listview}

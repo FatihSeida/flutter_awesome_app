@@ -8,3 +8,14 @@ abstract class PhotoEvent extends Equatable {
 }
 
 class FetchPhoto extends PhotoEvent {}
+
+class ToggleLayoutMode extends PhotoEvent {
+  final LayoutMode layoutMode;
+
+  ToggleLayoutMode(this.layoutMode);
+
+  @override
+  List<Object> get props => [layoutMode];
+}
+
+class LoadMorePhoto extends PhotoEvent {}

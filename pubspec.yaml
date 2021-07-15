@@ -23,10 +23,14 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  animations: ^2.0.1
+  connectivity: ^3.0.6
   cupertino_icons: ^1.0.2
   equatable: ^2.0.3
   flutter_bloc: ^7.0.1
+  fluttertoast: ^8.0.7
   http: ^0.13.3
+  rxdart: ^0.27.1
 
 dev_dependencies:
   flutter_test:
