@@ -15,9 +15,10 @@ class ListItem extends StatelessWidget {
   final PhotoState state;
   final List<Photo> photos;
 
+
   @override
   Widget build(BuildContext context) {
-    return state.layoutMode == LayoutMode.listview
+    return state.isListView == true
         ? SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {

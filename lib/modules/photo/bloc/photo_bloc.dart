@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:awesome_app/enums/layout_mode.dart';
 import 'package:awesome_app/modules/photo/models/album.dart';
 import 'package:awesome_app/modules/photo/repositories/photo_repository.dart';
 import 'package:bloc/bloc.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:equatable/equatable.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'photo_event.dart';
 part 'photo_state.dart';
@@ -81,8 +81,9 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
   }
 
   Stream<PhotoState> mapToggleLayoutModeToState(ToggleLayoutMode event) async* {
-    print(event.layoutMode);
-    yield state.copyWith(layoutMode: event.layoutMode);
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setBool('isListView', event.isListView);
+    yield state.copyWith(isListView: event.isListView);
   }
 
   Stream<PhotoState> mapLoadMorePhotoToState(PhotoState state) async* {
@@ -102,6 +103,7 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
         int page = state.page;
         ++page;
         final albumData = await photoRepository.fetchPhoto(page);
+
         yield state.copyWith(
           photoStatus: PhotoStatus.loaded,
           photos: List.of(state.photos)..addAll(albumData.photos),

@@ -8,10 +8,6 @@ class PhotoOpenBuilder extends StatelessWidget {
 
   final Photo photo;
 
-  void _launchURL(String _url) async => await canLaunch(_url)
-      ? await launch(_url)
-      : throw 'Could not launch $_url';
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +25,7 @@ class PhotoOpenBuilder extends StatelessWidget {
               ),
               title: InkWell(
                   onTap: () {
-                    _launchURL(photo.url);
+                    launch(photo.url);
                   },
                   child: Row(
                     children: [

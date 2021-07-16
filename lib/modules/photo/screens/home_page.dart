@@ -4,6 +4,7 @@ import 'package:awesome_app/modules/photo/models/album.dart';
 import 'package:awesome_app/modules/photo/screens/widgets/list_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key}) : super(key: key);
@@ -16,12 +17,22 @@ class _MyHomePageState extends State<MyHomePage> {
   late PhotoBloc photoBloc;
   final scrollController = ScrollController();
   List<Photo> photoCached = [];
+  late bool isListView;
+
+  Future<bool?> getModeStatus() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final isListView = prefs.getBool('isListView');
+    return isListView;
+  }
 
   @override
   void initState() {
     scrollController.addListener(_onScroll);
     photoBloc = context.read<PhotoBloc>();
-    photoBloc.add(FetchPhoto());
+    getModeStatus().then((isListView) {
+      context.read<PhotoBloc>().add(ToggleLayoutMode(isListView!));
+      photoBloc.add(FetchPhoto());
+    });
     super.initState();
   }
 
@@ -57,6 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
           photoBloc.add(FetchPhoto());
         },
         child: CustomScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
           controller: scrollController,
           slivers: [
             SliverAppBar(
@@ -75,17 +87,13 @@ class _MyHomePageState extends State<MyHomePage> {
               actions: [
                 IconButton(
                     onPressed: () {
-                      context
-                          .read<PhotoBloc>()
-                          .add(ToggleLayoutMode(LayoutMode.listview));
+                      context.read<PhotoBloc>().add(ToggleLayoutMode(true));
                     },
                     icon: Icon(Icons.list)),
                 SizedBox(width: 12),
                 IconButton(
                     onPressed: () {
-                      context
-                          .read<PhotoBloc>()
-                          .add(ToggleLayoutMode(LayoutMode.gridview));
+                      context.read<PhotoBloc>().add(ToggleLayoutMode(false));
                     },
                     icon: Icon(Icons.grid_view)),
                 SizedBox(width: 12),
@@ -120,6 +128,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
                   case PhotoStatus.loaded:
                     final photos = state.photos;
+                    if (state.photos.isEmpty) {
+                      return SliverToBoxAdapter(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            SizedBox(
+                              height: MediaQuery.of(context).size.height * 0.3,
+                            ),
+                            Text('No Photo'),
+                          ],
+                        ),
+                      );
+                    }
                     return ListItem(state, photos);
                   case PhotoStatus.noConnection:
                     return SliverToBoxAdapter(

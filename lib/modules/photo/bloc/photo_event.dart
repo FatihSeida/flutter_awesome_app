@@ -10,12 +10,12 @@ abstract class PhotoEvent extends Equatable {
 class FetchPhoto extends PhotoEvent {}
 
 class ToggleLayoutMode extends PhotoEvent {
-  final LayoutMode layoutMode;
+  final bool isListView;
 
-  ToggleLayoutMode(this.layoutMode);
+  ToggleLayoutMode(this.isListView);
 
   @override
-  List<Object> get props => [layoutMode];
+  List<Object> get props => [isListView];
 }
 
 class LoadMorePhoto extends PhotoEvent {}

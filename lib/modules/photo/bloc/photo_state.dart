@@ -1,31 +1,51 @@
 part of 'photo_bloc.dart';
 
-enum PhotoStatus { initial, loading, loaded, noConnection, error }
+enum PhotoStatus { loading, loaded, noConnection, error }
 
 class PhotoState extends Equatable {
+  final Album album;
   final List<Photo> photos;
-  final LayoutMode layoutMode;
+  final bool isListView;
   final PhotoStatus photoStatus;
   final bool hasReachedMax;
   final int page;
   final String connectionResultMessage;
 
-  PhotoState({
-    required this.photoStatus,
-    required this.photos,
-    required this.layoutMode,
-    required this.hasReachedMax,
-    required this.page,
-    required this.connectionResultMessage,
+  const PhotoState({
+    this.photos = const <Photo>[],
+    this.photoStatus = PhotoStatus.loading,
+    this.album = const Album(page: 0, perPage: 0, photos: []),
+    this.isListView = true,
+    this.hasReachedMax = false,
+    this.page = 0,
+    this.connectionResultMessage = '',
   });
 
+  
+
+
   @override
-  List<Object> get props =>
-      [photos, layoutMode, photoStatus, hasReachedMax, page, connectionResultMessage];
+  List<Object> get props => [
+        album,
+        isListView,
+        photoStatus,
+        hasReachedMax,
+        page,
+        connectionResultMessage,
+        photos,
+      ];
+
+  // Future<LayoutMode> isListViews() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final isListViews = prefs.getString('isListView');
+  //   final mode = json.decode(isListViews!);
+  //   return mode;
+  // }
 
   PhotoState copyWith({
+    Album? album,
     List<Photo>? photos,
-    LayoutMode? layoutMode,
+    bool? isListView,
     PhotoStatus? photoStatus,
     bool? hasReachedMax,
     int? page,
@@ -33,40 +53,21 @@ class PhotoState extends Equatable {
   }) {
     return PhotoState(
       photos: photos ?? this.photos,
-      layoutMode: layoutMode ?? this.layoutMode,
+      album: album ?? this.album,
+      isListView: isListView ?? this.isListView,
       photoStatus: photoStatus ?? this.photoStatus,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       page: page ?? this.page,
-      connectionResultMessage: connectionResultMessage ?? this.connectionResultMessage,
+      connectionResultMessage:
+          connectionResultMessage ?? this.connectionResultMessage,
     );
   }
 
   factory PhotoState.initial() {
     return PhotoState(
-      photos: [
-        Photo(
-          id: 0,
-          width: 0,
-          height: 0,
-          url: '',
-          photographer: '',
-          photographerUrl: '',
-          photographerId: 0,
-          avgColor: '',
-          src: Src(
-              original: '',
-              large2X: '',
-              large: '',
-              medium: '',
-              small: '',
-              portrait: '',
-              landscape: '',
-              tiny: ''),
-          liked: false,
-        ),
-      ],
-      layoutMode: LayoutMode.listview,
-      photoStatus: PhotoStatus.initial,
+      photos: [],
+      album: Album(page: 1, perPage: 20, photos: []),
+      photoStatus: PhotoStatus.loading,
       hasReachedMax: false,
       page: 0,
       connectionResultMessage: '',

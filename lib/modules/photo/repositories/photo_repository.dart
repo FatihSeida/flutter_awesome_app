@@ -13,25 +13,15 @@ class PhotoRepository {
   // PhotoRepository(this.cache);
 
   Future<Album> fetchPhoto([int page = 1]) async {
-    final prefs = await SharedPreferences.getInstance();
     try {
       final response = await http
           .get(Uri.parse("$baseUrl/curated?page=$page&per_page=20"), headers: {
         'Authorization': '$apiKey',
       });
       final results = json.decode(response.body.toString());
-      final albumData = json.encode(
-        {
-          'page': results['page'],
-          'per_page': results['per_page'],
-          'photos': results['photos'],
-          'total_results': results['total_results'],
-          'next_page': results['next_page'],
-        },
-      );
       // cache.set(Album.fromMap(results));
-      prefs.setString('albumData', albumData);
-      return Album.fromMap(results);
+      final album = Album.fromMap(results);
+      return album;
     } catch (e) {
       throw e;
     }
